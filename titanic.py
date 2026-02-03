@@ -1,29 +1,41 @@
 """
 Titanic ML project.
-
 """
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 import seaborn as sns
 import argparse
+from dotenv import load_dotenv
+import os
+from functions import pipe_func
+
+load_dotenv()  # reads variables from a .env file and sets them in os.environ
 
 
+
+#jeton API
+jeton_api = os.environ.get("JETON_API", "")
+
+if jeton_api.startswith("$"):
+    print("API token has been configured properly")
+else:
+    print("API token has not been configured")
+
+
+N_TREES=20
 # def n trees
-N_TREES = 20
 parser = argparse.ArgumentParser(description="Combien d'arbres ?")
 parser.add_argument(
     "--n_trees", type=int, default=N_TREES, help="Nombre d'arbres à utiliser"
 )
 args = parser.parse_args()
 print(args.n_trees)
+
+MAX_DEPTH=None
+MAX_FEATURES="sqrt"
 
 
 #
@@ -36,8 +48,6 @@ TrainingData["Ticket"].str.split("/").str.len()
 
 TrainingData["Name"].str.split(",").str.len()
 
-MAX_DEPTH = None
-MAX_FEATURES = "sqrt"
 
 TrainingData.isnull().sum()
 
@@ -66,42 +76,7 @@ plt.show()
 
 ## Encoder les données imputées ou transformées.
 
-numeric_features = ["Age", "Fare"]
-categorical_features = ["Embarked", "Sex"]
-
-numeric_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="median")),
-        ("scaler", MinMaxScaler()),
-    ]
-)
-
-categorical_transformer = Pipeline(
-    steps=[
-        ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("onehot", OneHotEncoder()),
-    ]
-)
-
-
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("Preprocessing numerical", numeric_transformer, numeric_features),
-        (
-            "Preprocessing categorical",
-            categorical_transformer,
-            categorical_features,
-        ),
-    ]
-)
-
-pipe = Pipeline(
-    [
-        ("preprocessor", preprocessor),
-        ("classifier", RandomForestClassifier(n_estimators=20)),
-    ]
-)
-
+pipe=pipe_func(N_TREES)
 
 # splitting samples
 y = TrainingData["Survived"]
@@ -113,8 +88,6 @@ X = TrainingData.drop("Survived", axis="columns")
 X_TRAIN, X_TEST, y_train, y_test = train_test_split(X, y, test_size=0.1)
 pd.concat([X_TRAIN, y_train], axis=1).to_csv("train.csv")
 pd.concat([X_TEST, y_test], axis=1).to_csv("test.csv")
-
-JETONAPI = "$trotskitueleski1917"
 
 
 # Random Forest
