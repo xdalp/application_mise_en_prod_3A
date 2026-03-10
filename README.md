@@ -8,6 +8,6 @@ ayant la structure suivante:
 JETON_API="####" #renseigner la valeur pertinente
 ```
 
-# Déploiement 
+# Déploiement  
 
 L'application est déployée via un dépôt Git dédié accessible [ici](https://github.com/xdalp/application-deployment).
